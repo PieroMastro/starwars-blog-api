@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, User, Character, Planet, Vehicle
 from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
@@ -16,3 +16,43 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@api.route('/users', methods=['GET', 'POST'])
+def get_users(): 
+    if request.method == 'GET':
+        users = User.query.all()
+        users_dictionaries = []
+        for user in users:
+            users_dictionaries.append(user.serialize())
+
+        return jsonify(users_dictionaries), 200
+
+    new_user_data = request.json
+            # new_user = User.create(
+            #     email = new_user_data['email'],
+            #     username = new_user_data['username'],
+            # )
+    try:
+        new_user = User.create(**new_user_data)
+        return jsonify(new_user.serialize()), 201
+    except Exception as error:
+        return jsonify(error.args[0]), error.args[1]
+
+
+@api.route('/character', methods=['GET', 'POST'])
+def get_characters():
+    if request.method == 'GET':
+        characters = Character.query.all()
+        characters_dictionary = []
+        for character in characters:
+            characters_dictionary.append(character.serialize())
+        return jasonify(characters_dictionary), 200
+
+    new_character_data = request.json
+    try:
+        new_character = Character.create(**new_character_data)
+        return jsonify(new_character.serialize()), 201
+    except Exception as error:
+        return jsonify(error.args[0]), error.args[1]
+    
