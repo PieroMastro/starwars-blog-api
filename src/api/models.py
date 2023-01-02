@@ -5,13 +5,13 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(80), nullable=False)
 
     def __init__(self, **kwargs):
         self.email = kwargs['email']
-        self.password = kwargs['password']
         self.username = kwargs['username']
+        self.password = kwargs['password']
 
     @classmethod
     def create(cls, **kwargs):

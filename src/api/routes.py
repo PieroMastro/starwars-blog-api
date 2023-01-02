@@ -44,15 +44,32 @@ def get_users():
 def get_characters():
     if request.method == 'GET':
         characters = Character.query.all()
-        characters_dictionary = []
+        characters_dictionaries = []
         for character in characters:
-            characters_dictionary.append(character.serialize())
-        return jasonify(characters_dictionary), 200
+            characters_dictionaries.append(character.serialize())
+        return jsonify(characters_dictionaries), 200
 
     new_character_data = request.json
     try:
         new_character = Character.create(**new_character_data)
         return jsonify(new_character.serialize()), 201
+    except Exception as error:
+        return jsonify(error.args[0]), error.args[1]
+
+
+@api.route('/planet', methods=['GET', 'POST'])
+def get_planets():
+    if request.method == 'GET':
+        planets = Planet.query.all()
+        planets_dictionaries = []
+        for planet in planets:
+            planets_dictionaries.append(planet.serialize())
+        return jsonify(planets_dictionaries), 200
+
+    new_planet_data = request.json
+    try:
+        new_planet = Planet.create(**new_planet_data)
+        return jsonify(new_planet.serialize()), 201
     except Exception as error:
         return jsonify(error.args[0]), error.args[1]
     
