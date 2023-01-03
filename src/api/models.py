@@ -31,7 +31,7 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            "username": self.username,
+            "username": self.username
             # do not serialize the password, its a security breach
         }
 
@@ -74,7 +74,7 @@ class Character(db.Model):
             "eye_color": self.eye_color,
             "height": self.height,
             "skin_color": self.skin_color,
-            "birth_year": self.birth_year,
+            "birth_year": self.birth_year
         }
 
 
@@ -114,7 +114,7 @@ class Planet(db.Model):
             "orbital_period": self.orbital_period,
             "population": self.population,
             "climate": self.climate,
-            "terrain": self.terrain,
+            "terrain": self.terrain
         }
 
 
@@ -153,15 +153,54 @@ class Vehicle(db.Model):
             "vehicle_class": self.vehicle_class,
             "cost_in_credits": self.cost_in_credits,
             "length": self.length,
-            "passengers": self.passengers,
+            "passengers": self.passengers
         }
 
 
-# class Favorite(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(120), nullable=False)
-#     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-#     character_id = db.Column(db.Integer, db.ForeignKey("character.id"))
-#     planet_id = db.Column(db.Integer, db.ForeignKey("planet.id"))
-#     vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicle.id"))
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    character_id = db.Column(db.Integer, db.ForeignKey("character.id"))
+    planet_id = db.Column(db.Integer, db.ForeignKey("planet.id"))
+    vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicle.id"))
     
+
+def __init__(self, **kwargs):
+    self.name = kwargs['name']
+    self.user_id = kwargs['user_id']
+    self.character_id = kwargs['character_id'] if 'character_id' in kwargs else None
+    self.planet_id = kwargs['planet_id'] if 'planet_id' in kwargs else None
+    self.vehicle_id = kwargs['vehicle_id'] if 'vehicle_id' in kwargs else None
+
+
+@classmethod
+def create_fav(cls, **kwargs):
+    new_favorite = cls(**kwars)
+    db.session.add(new_favorite)
+    try:
+        db.session.commit()
+        return new_favorite
+    except Exception as error:
+        raise Exception(error.args[0], 400)
+
+
+@classmethod
+def delete_favorite(cls, kwargs):
+    db.session.delete(kwargs)
+    try:
+        db.session.commit()
+        return {"message": "The favorite was deleted."}
+    except Exception as error:
+        raise Exception(error.args[0], 400)
+
+
+def serialize(self):
+    return {
+        "id": self.id,
+        "name": self.name,
+        "user_id": self.user_id,
+        "character_id": self.character_id,
+        "planet_id": self.planet_id,
+        "vehicle_id": self.vehicle_id
+    }

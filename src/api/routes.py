@@ -40,7 +40,7 @@ def get_users():
         return jsonify(error.args[0]), error.args[1]
 
 
-@api.route('/character', methods=['GET', 'POST'])
+@api.route('/characters', methods=['GET', 'POST'])
 def get_characters():
     if request.method == 'GET':
         characters = Character.query.all()
@@ -57,7 +57,7 @@ def get_characters():
         return jsonify(error.args[0]), error.args[1]
 
 
-@api.route('/planet', methods=['GET', 'POST'])
+@api.route('/planets', methods=['GET', 'POST'])
 def get_planets():
     if request.method == 'GET':
         planets = Planet.query.all()
@@ -70,6 +70,23 @@ def get_planets():
     try:
         new_planet = Planet.create(**new_planet_data)
         return jsonify(new_planet.serialize()), 201
+    except Exception as error:
+        return jsonify(error.args[0]), error.args[1]
+
+
+@api.route('/vehicles', methods=['GET', 'POST'])
+def get_vehicles():
+    if request.method == 'GET':
+        vehicles = Planet.query.all()
+        vehicles_dictionaries = []
+        for vehicle in vehicles:
+            vehicles_dictionaries.append(vehicle.serialize())
+        return jsonify(vehicles_dictionaries), 200
+
+    new_vehicle_data = request.json
+    try:
+        new_vehicle = Vehicle.create(**new_vehicle_data)
+        return jsonify(new_vehicle.serialize()), 201
     except Exception as error:
         return jsonify(error.args[0]), error.args[1]
     
