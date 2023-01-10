@@ -20,7 +20,7 @@ class User(db.Model):
 
         try:
             db.session.commit() #  INSERT INTO IS EXECUTED
-            return 
+            return new_user
         except Exception as error:
             raise Exception(error.args[0], 400)
             
@@ -41,9 +41,9 @@ class Character(db.Model):
     gender = db.Column(db.String(50))
     hair_color = db.Column(db.String(50))
     eye_color = db.Column(db.String(50))
-    height  = db.Column(db.String(50))
-    skin_color  = db.Column(db.String(50))
-    birth_year  = db.Column(db.String(50))
+    height = db.Column(db.String(50))
+    skin_color = db.Column(db.String(50))
+    birth_year = db.Column(db.String(50))
 
     def __init__(self, **kwargs):
         self.name = kwargs['name']
@@ -55,8 +55,8 @@ class Character(db.Model):
         self.birth_year = kwargs['birth_year']
 
     @classmethod
-    def create(cls, *kwargs):
-        new_character = cls(*kwargs)
+    def create(cls, **kwargs):
+        new_character = cls(**kwargs)
         db.session.add(new_character)
 
         try:
@@ -96,7 +96,7 @@ class Planet(db.Model):
         self.terrain = kwargs['terrain']
 
     @classmethod
-    def create(cls, *kwargs):
+    def create(cls, **kwargs):
         new_planet = cls(**kwargs)
         db.session.add(new_planet)
 
@@ -141,7 +141,7 @@ class Vehicle(db.Model):
         db.session.add(new_vehicle)
         try:
             db.session.commit()
-            return new_planet
+            return new_vehicle
         except Exception as error:
             raise Exception(error.args[0], 400)
 
@@ -175,7 +175,7 @@ def __init__(self, **kwargs):
 
 
 @classmethod
-def create_fav(cls, **kwargs):
+def create_favorite(cls, **kwargs):
     new_favorite = cls(**kwars)
     db.session.add(new_favorite)
     try:

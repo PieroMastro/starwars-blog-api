@@ -2,32 +2,33 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Character, Planet, Vehicle
+from api.models import db, User, Character, Planet, Vehicle, Favorite
 from api.utils import generate_sitemap, APIException
+
 
 api = Blueprint('api', __name__)
 
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+# @api.route('/hello', methods=['POST', 'GET'])
+# def handle_hello():
 
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
+#     response_body = {
+#         "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
+#     }
 
-    return jsonify(response_body), 200
+#     return jsonify(response_body), 200
 
 
-@api.route('/users', methods=['GET', 'POST'])
-def get_users(): 
+@api.route('/users', methods=['GET','POST'])
+def get_users():
     if request.method == 'GET':
         users = User.query.all()
         users_dictionaries = []
+
         for user in users:
             users_dictionaries.append(user.serialize())
-
         return jsonify(users_dictionaries), 200
-
+    
     new_user_data = request.json
             # new_user = User.create(
             #     email = new_user_data['email'],
@@ -35,9 +36,9 @@ def get_users():
             # )
     try:
         new_user = User.create(**new_user_data)
-        return jsonify(new_user.serialize()), 201
+        return jsonify(new_user.serialize()),201
     except Exception as error:
-        return jsonify(error.args[0]), error.args[1]
+        return jsonify(error.args[0]),error.args[1] if len(error.args) > 1 else 500
 
 
 @api.route('/characters', methods=['GET', 'POST'])
@@ -54,7 +55,15 @@ def get_characters():
         new_character = Character.create(**new_character_data)
         return jsonify(new_character.serialize()), 201
     except Exception as error:
-        return jsonify(error.args[0]), error.args[1]
+        return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('/characters/<int:character_id>', methods=['GET'])
+def get_character(character_id):
+    character = Character.query.filter_by(id = character_id)
+    try:
+        return jsonify(caracter[0].serialize())
+    except Exception as error:
+        return jsonify({"message": "Couldn't find the character."})
 
 
 @api.route('/planets', methods=['GET', 'POST'])
@@ -71,13 +80,21 @@ def get_planets():
         new_planet = Planet.create(**new_planet_data)
         return jsonify(new_planet.serialize()), 201
     except Exception as error:
-        return jsonify(error.args[0]), error.args[1]
+        return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('/planets/<int:planet_id>', methods=['GET'])
+def get_planet(planet_id):
+    character = Planet.query.filter_by(id = planet_id)
+    try:
+        return jsonify(planet[0].serialize())
+    except Exception as error:
+        return jsonify({"message": "Couldn't find the planet."})
 
 
 @api.route('/vehicles', methods=['GET', 'POST'])
 def get_vehicles():
     if request.method == 'GET':
-        vehicles = Planet.query.all()
+        vehicles = Vehicle.query.all()
         vehicles_dictionaries = []
         for vehicle in vehicles:
             vehicles_dictionaries.append(vehicle.serialize())
@@ -88,5 +105,36 @@ def get_vehicles():
         new_vehicle = Vehicle.create(**new_vehicle_data)
         return jsonify(new_vehicle.serialize()), 201
     except Exception as error:
-        return jsonify(error.args[0]), error.args[1]
-    
+        return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('/vehicles/<int:vehicle_id>', methods=['GET'])
+def get_vehicle(vehicle_id):
+    vehicle = Vehicle.query.filter_by(id = vehicle_id)
+    try:
+        return jsonify(vehicle[0].serialize())
+    except Exception as error:
+        return jsonify({"message": "Couldn't find the vehicle."})
+
+
+@api.route('users/<int:user_id>/favorites', methods=['GET'])
+def get_favorites(user_id):
+    favorites = Favorite.query.filter_by(user_id = user_id)
+    favorites_dictionary = []
+    for favorite in favorites:
+        favorites_dictionary.append(favorite.serialize())
+    return jsonify(favorites_dictionary), 200
+
+
+@api.route('favorite/characters/<int:user_id>/<int:character_id>', methods=['POST'])
+def add_character_to_favorites(character_id, user_id):
+
+    new_favorite_data = request.json
+    favorites = Favorite.query.filter_by(user_id = user_id, character_id = character_id).first()
+    if favorites is not None:
+        return jsonify({"message": "The character is already in favorites."}), 401
+    else:
+        try:
+            new_favorite = Favorite.create_favorite(user_id = user_id, character_id = character_id, **new_favorite_data)
+            return jsonify(new_favorite.serialize()), 201
+        except Exception as error:
+            return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
