@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Character, Planet, Vehicle, Favorite
 from api.utils import generate_sitemap, APIException
 
-
 api = Blueprint('api', __name__)
 
 
@@ -138,3 +137,60 @@ def add_character_to_favorites(character_id, user_id):
             return jsonify(new_favorite.serialize()), 201
         except Exception as error:
             return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('favorite/characters/<int:user_id>/<int:character_id>', methods=['DELETE'])  
+def delete_character_from_favorites(character_id, user_id):
+    favorite_to_delete = Favorite.query.filter_by(user_id = user_id, character_id = character_id).first()
+    try:
+        delete_char = Favorite.delete_favorite(favorite_to_delete)
+        return jsonify(delete_char), 200
+    except Exception as error:
+        return jsonify(error.args[0]),error.args[1] if len(error.args) > 1 else 500
+
+
+@api.route('favorite/planets/<int:user_id>/<int:planet_id>', methods=['POST'])
+def add_planet_to_favorites(planet_id, user_id):
+
+    new_favorite_data = request.json
+    favorites = Favorite.query.filter_by(user_id = user_id, planet_id = planet_id).first()
+    if favorites is not None:
+        return jsonify({"message": "The planet is already in favorites."}), 401
+    else:
+        try:
+            new_favorite = Favorite.create_favorite(user_id = user_id, planet_id = planet_id, **new_favorite_data)
+            return jsonify(new_favorite.serialize()), 201
+        except Exception as error:
+            return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('favorite/planets/<int:user_id>/<int:planet_id>', methods=['DELETE'])  
+def delete_planet_from_favorites(planet_id, user_id):
+    favorite_to_delete = Favorite.query.filter_by(user_id = user_id, planet_id = planet_id).first()
+    try:
+        delete_planet = Favorite.delete_favorite(favorite_to_delete)
+        return jsonify(delete_planet), 200
+    except Exception as error:
+        return jsonify(error.args[0]),error.args[1] if len(error.args) > 1 else 500
+
+
+@api.route('favorite/vehicles/<int:user_id>/<int:vehicle_id>', methods=['POST'])
+def add_vehicle_to_favorites(vehicle_id, user_id):
+
+    new_favorite_data = request.json
+    favorites = Favorite.query.filter_by(user_id = user_id, vehicle_id = vehicle_id).first()
+    if favorites is not None:
+        return jsonify({"message": "The vehicle is already in favorites."}), 401
+    else:
+        try:
+            new_favorite = Favorite.create_favorite(user_id = user_id, vehicle_id = vehicle_id, **new_favorite_data)
+            return jsonify(new_favorite.serialize()), 201
+        except Exception as error:
+            return jsonify(error.args[0]), error.args[1] if len(error.args) > 1 else 500
+
+@api.route('favorite/vehicles/<int:user_id>/<int:vehicle_id>', methods=['DELETE'])  
+def delete_vehicle_from_favorites(vehicle_id, user_id):
+    favorite_to_delete = Favorite.query.filter_by(user_id = user_id, vehicle_id = vehicle_id).first()
+    try:
+        delete_vehicle = Favorite.delete_favorite(favorite_to_delete)
+        return jsonify(delete_vehicle), 200
+    except Exception as error:
+        return jsonify(error.args[0]),error.args[1] if len(error.args) > 1 else 500
